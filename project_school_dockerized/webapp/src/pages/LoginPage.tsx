@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import AuthContext from "..";
 
 
 const LoginPage = () => {
+  const auth = useContext(AuthContext);
+        if( auth == true){
+            window.location.replace("/dashboard");
+        }
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -33,10 +38,11 @@ const LoginPage = () => {
                 'Access-Control-Allow-Origin' : '*',
                 'Access-Control-Allow-Methods':'GET,PUT,POST,DELETE,PATCH,OPTIONS',   
          }
-        }).then((res)=>{
-              const token = res.data.accessToken;
-               document.cookie = `jwt=${token}`;
-              navigate("/dashboard");
+        }).then(async (res)=>{
+              const token = res.data.accessToken;                
+              document.cookie = `jwt=${token}`;
+              document.cookie = `email=${email}`;
+              document.location.reload();
 
               
         }).catch((error)=>{

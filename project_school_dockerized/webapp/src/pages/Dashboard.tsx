@@ -1,54 +1,116 @@
 import axios from "axios";
-import React from "react";
-import { useEffect} from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "..";
+import UserNum from "../components/UserNum";
+import TeacherCell from "../components/users-cells/TeacherCell";
+import StudentCell from "../components/users-cells/StudentCell";
+import StudentTopTable from "../components/users-cells/StudentTopTable";
+import {getTeachers} from "../apis/get";
+import getCookie from "../apis/getCookies";
 
-const DashBoard = ()=>{
-    const navigate = useNavigate();
+const DashBoard = () => {
+  const navigate = useNavigate();
+  const auth = useContext(AuthContext);
 
-     const logout = async (event)=>{
-        event.preventDefault();
-        await axios.get("http://localhost:6868/logout").then((res)=>{
-            console.log(res);
-        })
-    }
-    return(
-        <section>
-            <div className="flex items-center justify-between p-4 w-full min-h-[50px] border-l border-r border-b border-gray-300  rounded-b-xl shadow-xl">
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/dashboard">Dashboard</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/teachers">Teachers</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/students">Students</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/classrooms">Class rooms</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/calendars">Calendars</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/grades">Grades</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/rewards">Rewards</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/teacher-review">Teacher review</a>
-                <a className="border-r border-gray-400 px-8 font-semibold" href="/student-gaps">Student Gaps</a>
-                <a className="px-8 font-semibold" href="/psycological-test">Psycolgical test</a>
-            </div>
-            <section className="flex justify-between">
-            <div className="text-center w-1/6 border-2 mt-4 h-[calc(100vh_-_100px)]  border-gray-200 shadow-2xl rounded-xl  mb-10 ml-2">
-                <h1 className="font-semibold mb-10 mt-10 text-lg">Main Dashboard</h1>
-                    <p onClick={()=>navigate("/teachers")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Teachers</p>
-                    <p onClick={()=>navigate("/students")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Students</p>
-                    <p onClick={()=>navigate("/classrooms")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Classrooms</p>
-                    <p onClick={()=>navigate("/calendars")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Calendars</p>
-                    <p onClick={()=>navigate("/grades")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Grades</p>
-                    <p onClick={()=>navigate("/rewards")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Rewards</p>
-                    <p onClick={()=>navigate("/student-gaps")} className="mb-6 font-semibold bg-slate-100 cursor-pointer ">Student Gaps</p>
-                    <button className="border border-black rounded-md text-white w-4/5 bg-black h-8 mt-10" onClick={logout}>Logout</button>
-            </div>
-            <div className="text-center w-4/5 border-2 mt-4 h-[calc(100vh_-_100px)]  border-gray-200 shadow-2xl rounded-xl mr-4">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"  className="w-6 h-6 m-4 cursor-pointer float-right">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-                    <p className="mt-4">Main Dashboard</p>
-            </div>
+  const [students, setStudents] : any = useState([]);
+  const [teachers, setTeachers] : any = useState([]);
 
-            </section>
-        </section>
-    );
-}
+  if (auth == false) {
+    window.location.replace("/login");
+  }
+
+  const token = getCookie("jwt");
+
+  const getAllData = async ()=>{
+    const resTeachers = await axios.get("http://localhost:6868/api/teachers",{
+      headers:{
+          'Authorization': `Bearer ${token}`,
+          'Content-Type' : 'application/json',
+          'Access-Control-Allow-Credentials': true,
+          'Access-Control-Allow-Origin' : '*',
+          'Access-Control-Allow-Methods':'GET,PUT,POST,DELETE,PATCH,OPTIONS',   
+      }});
+      const resStudents = await axios.get("http://localhost:6868/api/students", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Credentials": true,
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+        },
+      });
+
+      const studentData = resStudents.data;
+      const teachersData = resTeachers.data;
+
+      console.log(studentData);
+      
+
+      setStudents(studentData);
+      setTeachers(teachersData);
+  }
+
+  useEffect(()=>{
+      getAllData();
+  },[])
+
+  const teachersTop = [{},{},{},{},{}]
+  const studentsTop = [{},{},{},{},{}]
+
+  return (
+    <section className="w-4/5">
+      {/*page title */}
+      <p className="mt-6 ml-4 text-3xl mb-8 font-semibold">Dashboard</p>
+
+      <div className="container flex">
+        {/* Middle Stats */}
+        <div className="middle w-[60%]">
+          <div className="user-stats flex justify-between">
+            <UserNum type={"Students"} number={students.length} />
+            <UserNum type={"Teachers"} number={teachers.length} />
+            <UserNum type={"Parents"} number={students.length * 2} />
+          </div>
+          <div className="border-2 border-slate-400 rounded-md min-h-[280px] max-h-[280px] w-[98%]  mt-4  mx-[2%]">
+                
+          </div>
+        </div>
+
+        <div className="border-2 border-slate-400 rounded-md max-h-[440px]  w-[40%]   ml-4 mr-4">
+            <div className="flex justify-between top-card p-2">
+                <p className="font-semibold text-lg">Top rated teachers</p>
+                <p className="text-gray-500 text-sm">See all</p>
+            </div>
+            {teachersTop.map((teacher,index)=>{
+                return(
+                    <TeacherCell />
+                );
+            })}
+            
+        </div>
+      </div>
+      {/* Footer Stats */}
+      <div className="footer-stats w-full my-10 flex justify-between">
+        <div className="border-2 border-slate-400 rounded-lg w-[48%] ml-[1%] h-fit min-h-[350px]">
+            <p className="font-semibold text-lg pl-6 pt-6">Top 5 Students</p>
+            <div className="content m-6 border-2 border-gray-300 rounded-md">
+            <StudentTopTable/>
+            {studentsTop.map((teacher,index)=>{
+                return(
+                    <StudentCell />
+                );
+            })}
+            </div>
+        </div>
+
+        <div className="border-2 border-slate-400 rounded-lg w-[48%] mr-[1%] min-h-[350px] h-fit">
+
+        </div>
+
+      </div>
+    </section>
+  );
+};
 
 export default DashBoard;

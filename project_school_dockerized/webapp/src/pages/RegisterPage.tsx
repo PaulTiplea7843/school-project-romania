@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import AuthContext from "..";
 
 const RegisterPage = () => {
+  const auth = useContext(AuthContext);
+        if( auth == true){
+            window.location.replace("/login");
+        }
   const navigate = useNavigate();
+  
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,13 +20,13 @@ const RegisterPage = () => {
   const onChangeEmail = (event) => {
     setEmail(event.target.value);
   };
-  const onChangeFirstName = (event) => {
+  const changeFirstName = (event) => {
     setFirstName(event.target.value);
   };
-  const onChangeMiddleName = (event) => {
+  const changeMiddleName = (event) => {
     setMiddleName(event.target.value);
   };
-  const onChangeLastName = (event) => {
+  const changeLastName = (event) => {
     setLastName(event.target.value);
   };
   const onChangePassword = (event) => {
@@ -31,18 +37,18 @@ const RegisterPage = () => {
     event.preventDefault();
 
     const user = {
-      firstName: firstName,
-      lastName: lastName,
-      middleName: middleName,
+      first_name: firstName,
+      middle_name: middleName,
+      last_name: lastName,
       email: email,
       password: password,
       status:1,
     };
-
+    console.log(user);
     axios.post("http://localhost:6868/register", JSON.stringify(user),
     {
       headers:{
-          withCredential: true,
+          withCredential: false,
           'Content-Type' : 'application/json',
           'Access-Control-Allow-Credentials': true,
           'Access-Control-Allow-Origin' : '*',
@@ -50,6 +56,7 @@ const RegisterPage = () => {
    }
   }
     ).then((res)=>{
+
       navigate("/login");
       
     })
@@ -65,21 +72,21 @@ const RegisterPage = () => {
         <form className="mt-10" onSubmit={submit}>
           <p className="font-medium">First Name</p>
           <input
-            onChange={onChangeFirstName}
+            onChange={changeFirstName}
             className=" mt-4 w-full h-12 border-2 border-gray-300 rounded p-2 outline-none"
             placeholder="Enter your first name"
             type="text"
           ></input>
           <p className="font-medium mt-8">Middle Name</p>
           <input
-            onChange={onChangeMiddleName}
+            onChange={changeMiddleName}
             className=" mt-4 w-full h-12 border-2 border-gray-300 rounded p-2 outline-none"
             placeholder="Enter your middle name"
             type="text"
           ></input>
           <p className="font-medium mt-8">Last Name</p>
           <input
-            onChange={onChangeLastName}
+            onChange={changeLastName}
             className=" mt-4 w-full h-12 border-2 border-gray-300 rounded p-2 outline-none"
             placeholder="Enter your last name"
             type="text"
